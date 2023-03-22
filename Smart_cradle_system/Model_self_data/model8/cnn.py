@@ -32,10 +32,10 @@ from python_speech_features import mfcc
 fs = 44100
 
 
-with open('D:\\HK2-Năm 3\\PBL5\\Code\\Development-of-Baby-Monitor-Device-for-Baby-Cry-Detection-master\\Baby Cry Detection\\Model Training\\cnn.json', 'r') as f:
+with open('D:\\HK2-Năm 3\\PBL5\\Code\\Development-of-Baby-Monitor-Device-for-Baby-Cry-Detection-master\\Baby Cry Detection\Model Training\\cnn.json', 'r') as f:
     mymodel=model_from_json(f.read())
 
-mymodel.load_weights("D:\\HK2-Năm 3\\PBL5\\Code\\Development-of-Baby-Monitor-Device-for-Baby-Cry-Detection-master\\Baby Cry Detection\\Model Training\\cnn.h5")
+mymodel.load_weights("D:\\HK2-Năm 3\\PBL5\\Code\\Development-of-Baby-Monitor-Device-for-Baby-Cry-Detection-master\\Baby Cry Detection\Model Training\\cnn.h5")
 
 
 def butter_lowpass(cutoff,fs,order=5):
@@ -49,7 +49,7 @@ def butter_lowpass_filter(data,cutoff,fs,order=5):
     return y
 def feature(soundfile):
     s,r=sf.read(soundfile)
-    s=butter_lowpass_filter(s,11025,44100,order=3)
+    # s=butter_lowpass_filter(s,11025,44100,order=3)
     x=np.array_split(s,64)
     
     logg=[]
@@ -106,13 +106,13 @@ def doafter5():
         # os.system('python /home/pi/Downloads/sms.py')
     os.remove('rec.wav')
 
-    threading.Timer(5, doafter5).start()
+    threading.Timer(3, doafter5).start()
 
 
 if __name__ == '__main__':
     print('Detecting......')
     newdata = []
-    feats = feature('D:\\HK2-Năm 3\\PBL5\\Code\\Self_recording_data\\Crying_data_18_03\\AnyConv.com__Bản ghi âm mới 83.wav') 
+    feats = feature('D:\HK2-Năm 3\PBL5\Code\download_data\Laugh\laugh_1.m4a_22.wav') 
     d=np.zeros((64,12))
     for i in range(len(feats)):
         d[i:,]=feats[i]
