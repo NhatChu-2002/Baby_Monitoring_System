@@ -1,7 +1,3 @@
-#
-# sudo pip3 install pysoundfile
-# sudo pip3 install python_speech_features --upgrade
-# sudo apt-get install python3-pyaudio
 
 import os
 import numpy as np
@@ -31,54 +27,48 @@ from tensorflow.keras.utils import img_to_array
 from python_speech_features import mfcc
 fs = 44100
 
-
-with open('D:\\HK2-Năm 3\\PBL5\\Code\\Development-of-Baby-Monitor-Device-for-Baby-Cry-Detection-master\\Baby Cry Detection\Model Training\\cnn.json', 'r') as f:
+# D:\\HK2-Năm 3\\PBL5\\Code\\Smart_cradle_system\\Baby Cry Detection\\Model Training\\cnn.json
+with open('D:\\HK2-Năm 3\\PBL5\\Code\\Smart_cradle_system\\Baby Cry Detection\\Model Training\\cnn.json', 'r') as f:
     mymodel=model_from_json(f.read())
 
-mymodel.load_weights("D:\\HK2-Năm 3\\PBL5\\Code\\Development-of-Baby-Monitor-Device-for-Baby-Cry-Detection-master\\Baby Cry Detection\Model Training\\cnn.h5")
+mymodel.load_weights("D:\\HK2-Năm 3\\PBL5\\Code\\Smart_cradle_system\\Baby Cry Detection\\Model Training\\cnn.h5")
 
 
-def butter_lowpass(cutoff,fs,order=5):
-    nyq=0.5*fs
-    normal_cutoff=cutoff/nyq
-    b,a=butter(order,normal_cutoff,btype='low',analog=False)
-    return b,a
-def butter_lowpass_filter(data,cutoff,fs,order=5):
-    b,a=butter_lowpass(cutoff,fs,order=order)
-    y=lfilter(b,a,data)
-    return y
 def feature(soundfile):
     s,r=sf.read(soundfile)
     # s=butter_lowpass_filter(s,11025,44100,order=3)
     x=np.array_split(s,64)
     
-    logg=[]
-    for i in x:     
-        xx=np.mean(mfcc(i,r,numcep=12,nfft=2048),axis=0)
-        logg.append(xx)
-        
-    return  logg  
+    logg=np.zeros((64,12))
+    for i in range(len(x)):
+
+        m=np.mean(mfcc(x[i],r, numcep=12,nfft=2048),axis=0)
+        logg[i,:]=m
+
+    return logg  
 
 def doafter5():
     l = None
     livesound = None
     l = pyaudio.PyAudio()
+    record_second = 5
+    CHANNELS = 2
     livesound = l.open(format=pyaudio.paInt16,
-                 channels=1,
-                 rate=fs, input=True,frames_per_buffer=8192
+                 channels= CHANNELS,
+                 rate=fs, input=True,frames_per_buffer=8192,input_device_index = 2
                  )
     livesound.start_stream() 
     Livesound = None
     li = []
     
     timeout = time.time()+20
-    for f in range(0, int(fs/8192*2)):
+    for f in range(0, int(fs/8192*record_second)):
         Livesound = livesound.read(8192)
         li.append(Livesound)
         
    
     waves = wave.open('rec.wav','w')
-    waves.setnchannels(1)
+    waves.setnchannels(2)
     waves.setsampwidth(l.get_sample_size(pyaudio.paInt16))
     waves.setframerate(fs)
     waves.writeframes(b''.join(li))
@@ -91,35 +81,30 @@ def doafter5():
     d=np.zeros((64,12))
     for i in range(len(feats)):
         d[i:,]=feats[i]
-    x=np.expand_dims(d,axis=0)
-        
-
-    soundclass = int((mymodel.predict(x) > 0.5).astype("int32"))
-
-    print("Detecting....")
+    x=np.expand_dims(d,axis=0)    
+    n = mymodel.predict(x)
+    soundclass = int((n > 0.5).astype("int32"))
     print(soundclass)
-    print(mymodel.predict(x))
-    # if soundclass==1:
-    #     print("1")
-    # else:
-    #     print("0")
-        # os.system('python /home/pi/Downloads/sms.py')
+    print(n)
+    print("Detecting....")
+    
     os.remove('rec.wav')
 
-    threading.Timer(3, doafter5).start()
+    threading.Timer(record_second, doafter5).start()
 
 
 if __name__ == '__main__':
-    print('Detecting......')
-    newdata = []
-    feats = feature('D:\\HK2-Năm 3\\PBL5\\Code\\Data for Train\\Crying\\42A_Crying_sample.wav') 
-    d=np.zeros((64,12))
-    for i in range(len(feats)):
-        d[i:,]=feats[i]
-    x=np.expand_dims(d,axis=0)  
-    soundclass = int((mymodel.predict(x) > 0.5).astype("int32"))
+    # print('Detecting......')
+    # newdata = []
+    # feats = feature('D:\\HK2-Năm 3\\PBL5\\Code\\Smart_cradle_system\\untitled2.wav') 
+    # # print(feats.shape)
+    # d=np.zeros((64,12))
+    # for i in range(len(feats)):
+    #     d[i:,]=feats[i]
+    # x=np.expand_dims(d,axis=0)
+    # soundclass = int((mymodel.predict(x) > 0.5).astype("int32"))
 
-    print("Detecting....")
-    print(soundclass)
-    print(mymodel.predict(x))
-    # doafter5()
+    # print("Detecting....")
+    # print(soundclass)
+    # print(mymodel.predict(x))
+    doafter5()
