@@ -28,10 +28,10 @@ from python_speech_features import mfcc
 fs = 44100
 
 # D:\\HK2-Năm 3\\PBL5\\Code\\Smart_cradle_system\\Baby Cry Detection\\Model Training\\cnn.json
-with open('D:\\HK2-Năm 3\\PBL5\\Code\\Smart_cradle_system\\Baby Cry Detection\\Model Training\\cnn.json', 'r') as f:
+with open('D:\\HK2-Năm 3\\PBL5\\Code\\Smart_cradle_system\\Model_self_data\\Model9\\cnn.json', 'r') as f:
     mymodel=model_from_json(f.read())
 
-mymodel.load_weights("D:\\HK2-Năm 3\\PBL5\\Code\\Smart_cradle_system\\Baby Cry Detection\\Model Training\\cnn.h5")
+mymodel.load_weights("D:\\HK2-Năm 3\\PBL5\\Code\\Smart_cradle_system\\Model_self_data\\Model9\\cnn.h5")
 
 
 def feature(soundfile):
@@ -52,10 +52,10 @@ def doafter5():
     livesound = None
     l = pyaudio.PyAudio()
     record_second = 5
-    CHANNELS = 1
+    CHANNELS = 2
     livesound = l.open(format=pyaudio.paInt16,
                  channels= CHANNELS,
-                 rate=fs, input=True,frames_per_buffer=8192
+                 rate=fs, input=True,frames_per_buffer=8192,input_device_index = 2
                  )
     livesound.start_stream() 
     Livesound = None
@@ -68,7 +68,7 @@ def doafter5():
         
    
     waves = wave.open('rec.wav','w')
-    waves.setnchannels(1)
+    waves.setnchannels(2)
     waves.setsampwidth(l.get_sample_size(pyaudio.paInt16))
     waves.setframerate(fs)
     waves.writeframes(b''.join(li))
@@ -94,16 +94,16 @@ def doafter5():
 
 
 if __name__ == '__main__':
-    # print('Detecting......')
-    # newdata = []
-    # feats = feature('D:\\HK2-Năm 3\\PBL5\\Code\\Smart_cradle_system\\untitled.wav') 
-    # # print(feats.shape)
-    # d=np.zeros((64,12))
-    # for i in range(len(feats)):
-    #     d[i:,]=feats[i]
-    # x=np.expand_dims(d,axis=0)
-    # n = mymodel.predict(x)
-    # soundclass = int((n > 0.5).astype("int32"))
-    # print(soundclass)
-    # print(n)
-    doafter5()
+    print('Detecting......')
+    newdata = []
+    feats = feature('D:\\HK2-Năm 3\\PBL5\\Code\\Smart_cradle_system\\untitled.wav') 
+    # print(feats.shape)
+    d=np.zeros((64,12))
+    for i in range(len(feats)):
+        d[i:,]=feats[i]
+    x=np.expand_dims(d,axis=0)
+    n = mymodel.predict(x)
+    soundclass = int((n > 0.5).astype("int32"))
+    print(soundclass)
+    print(n)
+    # doafter5()
